@@ -5,7 +5,7 @@ from collections import namedtuple
 import multigoal_env  # import this one for env registration
 from gym import make
 from gym.error import UnregisteredEnv
-from utils.plot import smoothed_plot, smoothed_plot_multi_line
+from agent.utils.plot import smoothed_plot, smoothed_plot_multi_line
 from agent.universal_option_framework import UniversalOptionFramework as UOF
 from agent.utils.demonstrator import Demonstrator
 

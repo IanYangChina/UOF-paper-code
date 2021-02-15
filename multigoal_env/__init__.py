@@ -1,4 +1,4 @@
-from gym.envs.registration import register
+from gym.envs.registration import register, make
 
 
 # Fetch Pick and Place
@@ -35,8 +35,9 @@ register(
 ids.append('TwoObjectOneOrderHAC-v0')
 register(
     id='TwoObjectOneOrderHAC-v0',
-    entry_point='multigoal_env.fetch_envs.two_obj_one_order_hac:MGPickAndPlaceEnv',
-    kwargs={'reward_type': 'sparse'},
+    entry_point='multigoal_env.fetch_envs.two_obj_one_order:MGPickAndPlaceEnv',
+    kwargs={'reward_type': 'sparse',
+            'binary_final_goal': False},
     max_episode_steps=25,
 )
 

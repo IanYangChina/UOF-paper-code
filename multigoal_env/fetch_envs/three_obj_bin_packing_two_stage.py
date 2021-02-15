@@ -3,6 +3,7 @@ import numpy as np
 from copy import deepcopy as dcp
 from gym import utils
 from multigoal_env import multigoal_fetch_env
+from multigoal_env.demonstrator import StepDemonstrator
 
 # Ensure we get the path separator correct on windows
 MODEL_XML_PATH = os.path.join('fetch', 'three_obj_bin_packing.xml')
@@ -28,6 +29,22 @@ class MGPickAndPlaceEnv(multigoal_fetch_env.MultiGoalFetch, utils.EzPickle):
                  binary_final_goal=True,
                  distance_threshold=0.02,
                  rotational_control_z=False):
+        self.demonstrator = StepDemonstrator([
+            [0],
+            [0, 1],
+            [0, 1, 2],
+            [0, 1, 2, 3],
+            [0, 1, 2, 3, 4],
+            [0, 1, 2, 3, 4, 5],
+            [0, 1, 2, 3, 4, 5, 6],
+            [7],
+            [7, 8],
+            [7, 8, 9],
+            [7, 8, 9, 10],
+            [7, 8, 9, 10, 11],
+            [7, 8, 9, 10, 11, 12],
+            [7, 8, 9, 10, 11, 12, 13]
+        ])
         initial_qpos = {
             'robot0:slide0': 0.405,
             'robot0:slide1': 0.48,

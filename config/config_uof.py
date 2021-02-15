@@ -1,0 +1,52 @@
+import os
+
+
+class Params:
+    # high-level policy params
+    HIGH_LEVEL_LEARNING_RATE = 0.001
+    HIGH_LEVEL_GAMMA = 0.98
+    HIGH_LEVEL_TAU = 0.1
+    HIGH_LEVEL_BATCH_SIZE = 128
+    HIGH_LEVEL_MEM_CAPACITY = int(1e6)
+    HIGH_LEVEL_CLIP_VALUE = -50
+    HIGH_LEVEL_OPTIMIZATION_STEP = 40
+    HIGH_LEVEL_EXPLORATION_START = 1.0
+    HIGH_LEVEL_EXPLORATION_END = 0.02
+    HIGH_LEVEL_EXPLORATION_DECAY = 30000
+    LOAD_HIGH_LEVEL_INPUT_NORMALIZATION_STATISTICS = False
+
+    # low-level policy params
+    LOW_LEVEL_LEARNING_RATE = 0.001
+    LOW_LEVEL_GAMMA = 0.98
+    LOW_LEVEL_TAU = 0.1
+    LOW_LEVEL_BATCH_SIZE = 128
+    LOW_LEVEL_MEM_CAPACITY = int(1e6)
+    LOW_LEVEL_CLIP_VALUE = -25
+    LOW_LEVEL_OPTIMIZATION_STEP = 40
+    LOW_LEVEL_EXPLORATION_ALPHA = 0.2
+    LOW_LEVEL_EXPLORATION_SIGMA = 0.05
+    LOAD_LOW_LEVEL_INPUT_NORMALIZATION_STATISTICS = False
+
+    # AAES & demonstration
+    LOW_LEVEL_EXPLORATION_AAES = True
+    LOW_LEVEL_EXPLORATION_AAES_TAU = 0.05
+    ABSTRACT_DEMONSTRATION = True
+    ABSTRACT_DEMONSTRATION_PROPORTION = 0.75
+
+    # hierarchical params
+    MULTI_INTER_POLICY = False
+    MULTI_INTRA_POLICY = False
+
+    # training params
+    ENV_ID = 'TwoObjectOneOrderBinaryHighLvGoal-v0'
+    TRAINING_EPOCH = 201
+    TRAINING_CYCLE = 50
+    TRAINING_EPISODE = 16
+    TESTING_EPISODE = 30
+    TESTING_GAP = 1
+    TESTING_TIMESTEP = 50
+    SAVING_GAP = 50
+    SEED = 0
+    PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'result')
+    CKPT_PATH = os.path.join(PATH, "ckpts")
+    DATA_PATH = os.path.join(PATH, "data")
