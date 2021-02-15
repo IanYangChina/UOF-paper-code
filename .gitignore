@@ -1,1 +1,7 @@
 /.idea
+/__pycache__/
+/agent/__pycache__/
+/agent/utils/__pycache__/
+/multigoal_env/__pycache__/
+/multigoal_env/ball_envs/__pycache__/
+/multigoal_env/fetch_envs/__pycache__/
