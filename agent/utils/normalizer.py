@@ -69,6 +69,7 @@ class GoalEnvNormalizer(object):
         self.goal_dims_high = goal_dims_high
         self.goal_history_high = []
 
+        self.different_goals = different_goals
         self.set_statistics(input_mean_low, input_var_low)
 
         self.input_mean_low = np.concatenate((self.obs_history_mean, self.goal_history_mean_low), axis=0)
@@ -76,7 +77,6 @@ class GoalEnvNormalizer(object):
         self.input_mean_high = np.concatenate((self.obs_history_mean, self.goal_history_mean_high), axis=0)
         self.input_var_high = np.concatenate((self.obs_history_var, self.goal_history_var_high), axis=0)
 
-        self.different_goals = different_goals
         self.sample_count = 0
         self.epsilon_low = epsilon * np.ones(self.obs_dims+self.goal_dims_low)
         self.input_clip_range_low = (-clip_range*np.ones(self.obs_dims+self.goal_dims_low),

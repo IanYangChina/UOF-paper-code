@@ -3,6 +3,7 @@ import os
 
 class Params:
     # high-level policy params
+    HIGH_LEVEL_TRAIN = True
     HIGH_LEVEL_LEARNING_RATE = 0.001
     HIGH_LEVEL_GAMMA = 0.98
     HIGH_LEVEL_TAU = 0.1
@@ -16,6 +17,7 @@ class Params:
     LOAD_HIGH_LEVEL_INPUT_NORMALIZATION_STATISTICS = False
 
     # low-level policy params
+    LOW_LEVEL_TRAIN = True
     LOW_LEVEL_LEARNING_RATE = 0.001
     LOW_LEVEL_GAMMA = 0.98
     LOW_LEVEL_TAU = 0.1
@@ -23,6 +25,7 @@ class Params:
     LOW_LEVEL_MEM_CAPACITY = int(1e6)
     LOW_LEVEL_CLIP_VALUE = -25
     LOW_LEVEL_OPTIMIZATION_STEP = 40
+    LOW_LEVEL_HINDSIGHT_REPLAY = True
     LOW_LEVEL_EXPLORATION_ALPHA = 0.2
     LOW_LEVEL_EXPLORATION_SIGMA = 0.05
     LOAD_LOW_LEVEL_INPUT_NORMALIZATION_STATISTICS = False
@@ -39,13 +42,13 @@ class Params:
 
     # training params
     ENV_ID = 'TwoObjectOneOrderBinaryHighLvGoal-v0'
-    TRAINING_EPOCH = 201
+    TRAINING_EPOCH = 51
     TRAINING_CYCLE = 50
     TRAINING_EPISODE = 16
     TESTING_EPISODE = 30
     TESTING_GAP = 1
     TESTING_TIMESTEP = 50
-    SAVING_GAP = 50
+    SAVING_GAP = 25
     SEED = 0
     PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'result')
     CKPT_PATH = os.path.join(PATH, "ckpts")
