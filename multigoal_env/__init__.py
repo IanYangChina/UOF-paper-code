@@ -3,7 +3,7 @@ from gym.envs.registration import register, make
 
 # Fetch Pick and Place
 # ----------------------------------------
-ids = ['TwoObjectOneOrderBlockInformed-v0']
+ids = ['TwoObjectOneOrderBlockInformedLowLvGoal-v0']
 register(
     id='TwoObjectOneOrderBlockInformed-v0',
     entry_point='multigoal_env.fetch_envs.two_obj_block_informed:MGPickAndPlaceEnv',
@@ -19,17 +19,6 @@ register(
     kwargs={'reward_type': 'sparse',
             'binary_final_goal': True},
     max_episode_steps=25,
-)
-
-ids.append('ThreeObjectBinPackingTwoStageRotation-v0')
-register(
-    id='ThreeObjectBinPackingTwoStageRotation-v0',
-    entry_point='multigoal_env.fetch_envs.three_obj_bin_packing_two_stage:MGPickAndPlaceEnv',
-    kwargs={'reward_type': 'sparse',
-            'binary_final_goal': True,
-            'distance_threshold': 0.02,
-            'rotational_control_z': True},
-    max_episode_steps=60,
 )
 
 ids.append('TwoObjectOneOrderHAC-v0')
@@ -70,8 +59,8 @@ register(
     max_episode_steps=25,
 )
 
-for high_level_goal_type in ['Position', 'Binary']:
-    if high_level_goal_type == 'Position':
+for high_level_goal_type in ['BlockInformed', 'Binary']:
+    if high_level_goal_type == 'BlockInformed':
         binary_final_goal = False
     else:
         binary_final_goal = True
@@ -94,49 +83,29 @@ for high_level_goal_type in ['Position', 'Binary']:
         max_episode_steps=25,
                     )
 
-    ids.append('ThreeObjectOneStageSixOrder{}HighLvGoal-v0'.format(high_level_goal_type))
-    register(
-        id='ThreeObjectOneStageSixOrder{}HighLvGoal-v0'.format(high_level_goal_type),
-        entry_point='multigoal_env.fetch_envs.three_obj_one_stage_six_order:MGPickAndPlaceEnv',
-        kwargs={'reward_type': 'sparse',
-                'binary_final_goal': binary_final_goal},
-        max_episode_steps=25,
-                    )
+ids.append('ThreeObjectOneStageSixOrder-v0')
+register(
+    id='ThreeObjectOneStageSixOrder-v0',
+    entry_point='multigoal_env.fetch_envs.three_obj_one_stage_six_order:MGPickAndPlaceEnv',
+    kwargs={'reward_type': 'sparse',
+            'binary_final_goal': True},
+    max_episode_steps=25,
+                )
 
-    ids.append('ThreeObjectTwoStageTwoOrder{}HighLvGoal-v0'.format(high_level_goal_type))
-    register(
-        id='ThreeObjectTwoStageTwoOrder{}HighLvGoal-v0'.format(high_level_goal_type),
-        entry_point='multigoal_env.fetch_envs.three_obj_two_stage_two_order:MGPickAndPlaceEnv',
-        kwargs={'reward_type': 'sparse',
-                'binary_final_goal': binary_final_goal},
-        max_episode_steps=40,
-                    )
+ids.append('ThreeObjectTwoStageTwoOrder-v0'.format(high_level_goal_type))
+register(
+    id='ThreeObjectTwoStageTwoOrder-v0'.format(high_level_goal_type),
+    entry_point='multigoal_env.fetch_envs.three_obj_two_stage_two_order:MGPickAndPlaceEnv',
+    kwargs={'reward_type': 'sparse',
+            'binary_final_goal': True},
+    max_episode_steps=40,
+                )
 
-    ids.append('ThreeObjectTwoStageThreeOrder{}HighLvGoal-v0'.format(high_level_goal_type))
-    register(
-        id='ThreeObjectTwoStageThreeOrder{}HighLvGoal-v0'.format(high_level_goal_type),
-        entry_point='multigoal_env.fetch_envs.three_obj_two_stage_three_order:MGPickAndPlaceEnv',
-        kwargs={'reward_type': 'sparse',
-                'binary_final_goal': binary_final_goal},
-        max_episode_steps=40,
-                    )
-
-    ids.append('ThreeObjectBinPackingOneStage{}HighLvGoal-v0'.format(high_level_goal_type))
-    register(
-        id='ThreeObjectBinPackingOneStage{}HighLvGoal-v0'.format(high_level_goal_type),
-        entry_point='multigoal_env.fetch_envs.three_obj_bin_packing_one_stage:MGPickAndPlaceEnv',
-        kwargs={'reward_type': 'sparse',
-                'binary_final_goal': binary_final_goal,
-                'distance_threshold': 0.02},
-        max_episode_steps=40,
-                    )
-
-    ids.append('ThreeObjectBinPackingTwoStage{}HighLvGoal-v0'.format(high_level_goal_type))
-    register(
-        id='ThreeObjectBinPackingTwoStage{}HighLvGoal-v0'.format(high_level_goal_type),
-        entry_point='multigoal_env.fetch_envs.three_obj_bin_packing_two_stage:MGPickAndPlaceEnv',
-        kwargs={'reward_type': 'sparse',
-                'binary_final_goal': binary_final_goal,
-                'distance_threshold': 0.02},
-        max_episode_steps=60,
-                    )
+ids.append('Pyramid-v0')
+register(
+    id='ThreeObjectBinPackingTwoStage-v0',
+    entry_point='multigoal_env.fetch_envs.three_obj_bin_packing_two_stage:MGPickAndPlaceEnv',
+    kwargs={'reward_type': 'sparse',
+            'binary_final_goal': True},
+    max_episode_steps=60,
+)

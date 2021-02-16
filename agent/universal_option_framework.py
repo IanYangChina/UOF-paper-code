@@ -23,12 +23,18 @@ ACT_Tr = namedtuple("transition",
 class UniversalOptionFramework(object):
     def __init__(self, params):
         T.manual_seed(params.SEED)
+        self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
+
         self.path = params.PATH
         self.ckpt_path = params.CKPT_PATH
         self.data_path = params.DATA_PATH
         for path in [self.path, self.ckpt_path, self.data_path]:
             os.makedirs(path, exist_ok=True)
-        self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
+
+        self.load_pre_trained_policy = params.LOAD_PER_TRAIN_POLICY
+        self.pre_trained_path = params.PRE_TRAIN_PATH
+        self.pre_trained_ckpt_path = params.PRE_TRAIN_CKPT_PATH
+        self.pre_trained_data_path = params.PRE_TRAIN_DATA_PATH
 
         try:
             self.env = mg.make(params.ENV_ID)
@@ -116,23 +122,11 @@ class UniversalOptionFramework(object):
         self.act_optim_steps = params.LOW_LEVEL_OPTIMIZATION_STEP
         self.act_hindsight = params.LOW_LEVEL_HINDSIGHT_REPLAY
         # Get actors
-        self.multi_intra = params.MULTI_INTRA_POLICY
         self.action_dim = self.env.action_space.shape[0]
         self.action_max = self.env.action_space.high
-        if not self.multi_intra:
-            self.actor = self._get_actor(params.LOW_LEVEL_MEM_CAPACITY,
-                                         params.SEED,
-                                         params.LOW_LEVEL_LEARNING_RATE)
-            self.current_act_memory = self.actor['actor_memory']
-        else:
-            self.num_intra_option_policies = self.option_num
-            self.actors = []
-            for _ in range(self.num_intra_option_policies):
-                self.actors.append(self._get_actor(params.LOW_LEVEL_MEM_CAPACITY,
-                                                   params.SEED,
-                                                   params.LOW_LEVEL_LEARNING_RATE))
-            self.current_act_memory = self.actors[0]['actor_memory']
-        self.current_actor_dict = None
+        self.actor = self._get_actor(params.LOW_LEVEL_MEM_CAPACITY,
+                                     params.SEED,
+                                     params.LOW_LEVEL_LEARNING_RATE)
         # Exploration
         self.aaes_exploration = params.LOW_LEVEL_EXPLORATION_AAES
         if not self.aaes_exploration:
@@ -148,12 +142,12 @@ class UniversalOptionFramework(object):
             self.env._max_episode_steps = self.training_time_steps
             self._train(epo=epo, render=render)
 
-            if epo % self.testing_gap == 0:
-                print("Epoch: %i Low-level train avg return: " % epo,
-                      self.statistic_dict['low_level_train_avg_goal_specific_return_per_epoch'][-1])
-                print("Epoch: %i High-level train avg return: " % epo,
-                      self.statistic_dict['high_level_train_avg_goal_specific_return_per_epoch'][-1])
+            print("Epoch: %i Low-level train avg return: " % epo,
+                  self.statistic_dict['low_level_train_avg_goal_specific_return_per_epoch'][-1])
+            print("Epoch: %i High-level train avg return: " % epo,
+                  self.statistic_dict['high_level_train_avg_goal_specific_return_per_epoch'][-1])
 
+            if epo % self.testing_gap == 0:
                 if self.act_train:
                     self.env._max_episode_steps = self.testing_time_steps
                     self.test_actor(render=render)
@@ -171,7 +165,7 @@ class UniversalOptionFramework(object):
 
                 if self.opt_train:
                     self.test_optor(render=render)
-                    print("Epoch: %i High-level test success rates: " % epo, 
+                    print("Epoch: %i High-level test success rates: " % epo,
                           self.statistic_dict['high_level_test_avg_goal_specific_success_rate'][-1])
 
             if (epo % self.saving_gap == 0) and (epo != 0):
@@ -220,10 +214,10 @@ class UniversalOptionFramework(object):
                         opt_reward, sub_goal_done, _, _ = self.env.option_step(obs_, option, act_reward)
                         high_level_goal_specific_return[final_goal_ind] += int(opt_reward + 1)
                         if self.act_train:
-                            self.current_act_memory.store_experience(new_option,
-                                                                     obs['observation'], obs['sub_goal'], action,
-                                                                     obs_['observation'], obs_['achieved_sub_goal'],
-                                                                     act_reward, 1 - int(sub_goal_done))
+                            self.actor['actor_memory'].store_experience(new_option,
+                                                                        obs['observation'], obs['sub_goal'], action,
+                                                                        obs_['observation'], obs_['achieved_sub_goal'],
+                                                                        act_reward, 1 - int(sub_goal_done))
                         if self.opt_train:
                             self.current_opt_memory.store_experience(new_episode,
                                                                      op_obs['observation'],
@@ -290,6 +284,12 @@ class UniversalOptionFramework(object):
                 if ep_return > 0:
                     # refer the episode as a success if the demanded goal was achieved for even just one timestep
                     avg_success[goal_ind] += 1
+
+        if load_network_epoch is not None:
+            print("After %i test episodes per goal:" % testing_episode_per_goal)
+            print("----Low-level policy average returns of each goal: ", avg_return / testing_episode_per_goal)
+            print("----Low-level policy average success rates of each goal: ", avg_success / testing_episode_per_goal)
+
         # save return statistics
         self.statistic_dict['low_level_test_avg_goal_specific_return'].append(
             avg_return / testing_episode_per_goal)
@@ -335,6 +335,12 @@ class UniversalOptionFramework(object):
                 if ep_return > 0:
                     # refer the episode as a success if the demanded goal was achieved for even just one timestep
                     avg_success[goal_ind] += 1
+
+        if load_network_epoch is not None:
+            print("After %i test episodes per goal:" % testing_episode_per_goal)
+            print("----High-level policy average returns of each goal: ", avg_return / testing_episode_per_goal)
+            print("----High-level policy average success rates of each goal: ", avg_success / testing_episode_per_goal)
+
         # save return statistics
         self.statistic_dict['high_level_test_avg_goal_specific_return'].append(
             avg_return / testing_episode_per_goal)
@@ -363,20 +369,11 @@ class UniversalOptionFramework(object):
         res : np.ndarray
             an action produced by the actor or at random
         """
-        if self.multi_intra:
-            # use a different actor for different step if the it is a multiple actor experiment
-            self.current_actor_dict = self.actors[step]
-            current_actor = self.actors[step]['actor_target']
-            self.current_act_memory = self.actors[step]['actor_memory']
-        else:
-            self.current_actor_dict = self.actor
-            current_actor = self.actor['actor_target']
-
         inputs = np.concatenate((state, low_level_goal), axis=0)
         inputs = self.normalizer(inputs, level='low')
         inputs = T.tensor(inputs, dtype=T.float).to(self.device)
         with T.no_grad():
-            action = current_actor(inputs).cpu().detach().numpy()
+            action = self.actor['actor_target'](inputs).cpu().detach().numpy()
         if test:
             action = np.clip(action, -self.action_max, self.action_max)
         else:
@@ -438,12 +435,7 @@ class UniversalOptionFramework(object):
     def _update(self):
         if self.act_train:
             self.normalizer.update()
-            if not self.multi_intra:
-                self._act_learn(self.actor)
-            else:
-                for actor_dict in self.actors:
-                    self.current_act_memory = actor_dict['actor_memory']
-                    self._act_learn(actor_dict)
+            self._act_learn(self.actor)
 
         if self.opt_train:
             self.normalizer.update()
@@ -455,19 +447,19 @@ class UniversalOptionFramework(object):
                     self._opt_learn(optor_dict)
 
     def _act_learn(self, actor_dict):
-        if len(self.current_act_memory.episodes) == 0:
+        if len(self.actor['actor_memory'].episodes) == 0:
             return
         if self.act_hindsight:
-            self.current_act_memory.modify_experiences()
-        self.current_act_memory.store_episode()
+            self.actor['actor_memory'].modify_experiences()
+        self.actor['actor_memory'].store_episode()
 
         batch_size = self.act_batch_size
-        if len(self.current_act_memory) < batch_size:
+        if len(self.actor['actor_memory']) < batch_size:
             return
 
         steps = self.act_optim_steps
         for i in range(steps):
-            batch = self.current_act_memory.sample(batch_size)
+            batch = self.actor['actor_memory'].sample(batch_size)
             actor_inputs = np.concatenate((batch.state, batch.desired_goal), axis=1)
             actor_inputs = self.normalizer(actor_inputs, level='low')
             actor_inputs = T.tensor(actor_inputs, dtype=T.float32).to(self.device)
@@ -639,11 +631,8 @@ class UniversalOptionFramework(object):
 
     def _save_ckpts(self, epoch, intra=True, inter=True):
         if intra:
-            if not self.multi_intra:
-                self._save_networks(actor_dict=self.actor, optor_dict=None, epoch=epoch, ind=None)
-            else:
-                for _ in range(len(self.actors)):
-                    self._save_networks(actor_dict=self.actors[_], optor_dict=None, epoch=epoch, ind=_)
+            self._save_networks(actor_dict=self.actor, optor_dict=None, epoch=epoch, ind=None)
+
         if inter:
             if not self.multi_inter:
                 self._save_networks(actor_dict=None, optor_dict=self.optor, epoch=epoch, ind=None)
@@ -663,16 +652,17 @@ class UniversalOptionFramework(object):
             T.save(actor_dict['actor_target'].state_dict(), self.ckpt_path + '/ckpt_actor_target_epoch' + ckpt_mark)
 
     def _load_ckpts(self, epoch, intra=False, inter=False):
+        if self.load_pre_trained_policy:
+            path = self.pre_trained_data_path
+        else:
+            path = self.data_path
         self.normalizer.set_statistics(
-            mean=np.load(os.path.join(self.data_path, "act_input_means.npy")),
-            var=np.load(os.path.join(self.data_path, "act_input_vars.npy"))
+            mean=np.loadtxt(os.path.join(path, "act_input_means.dat")),
+            var=np.loadtxt(os.path.join(path, "act_input_vars.dat"))
         )
         if intra:
-            if not self.multi_intra:
-                self._load_network(actor_dict=self.actor, optor_dict=None, epoch=epoch, ind=None)
-            else:
-                for _ in range(len(self.actors)):
-                    self._load_network(actor_dict=self.actors[_], optor_dict=None, epoch=epoch, ind=_)
+            self._load_network(actor_dict=self.actor, optor_dict=None, epoch=epoch, ind=None)
+
         if inter:
             if not self.multi_inter:
                 self._load_network(actor_dict=None, optor_dict=self.optor, epoch=epoch, ind=None)
@@ -680,26 +670,26 @@ class UniversalOptionFramework(object):
                 for _ in range(len(self.optors)):
                     self._load_network(actor_dict=None, optor_dict=self.optors[_], epoch=epoch, ind=_)
 
-    def _load_network(self, actor_dict, optor_dict, epoch, ind=None, specified_path=None):
+    def _load_network(self, actor_dict, optor_dict, epoch, ind=None):
+        if self.load_pre_trained_policy:
+            path = self.pre_trained_ckpt_path
+        else:
+            path = self.ckpt_path
         if ind is None:
             ckpt_mark = str(epoch) + '.pt'
         else:
             ckpt_mark = str(epoch) + 'No' + str(ind) + '.pt'
-        if specified_path is None:
-            path = self.ckpt_path
-        else:
-            path = specified_path
         if optor_dict is not None:
             optor_dict['optor_target'].load_state_dict(
-                T.load(path + '/ckpt_optor_target_epoch' + ckpt_mark, map_location=self.device))
+                T.load(os.path.join(path, '/ckpt_optor_target_epoch'+ckpt_mark), map_location=self.device))
 
         if actor_dict is not None:
             actor_dict['actor_target'].load_state_dict(
-                T.load(path + '/ckpt_actor_target_epoch' + ckpt_mark, map_location=self.device))
+                T.load(os.path.join(path, '/ckpt_actor_target_epoch'+ckpt_mark), map_location=self.device))
 
     def _save_statistics(self):
-        np.save(os.path.join(self.data_path, 'act_input_means'), self.normalizer.input_mean_low)
-        np.save(os.path.join(self.data_path, 'act_input_vars'), self.normalizer.input_var_low)
+        np.savetxt(os.path.join(self.data_path, 'act_input_means.dat'), self.normalizer.input_mean_low)
+        np.savetxt(os.path.join(self.data_path, 'act_input_vars.dat'), self.normalizer.input_var_low)
         for key in self.statistic_dict.keys():
             self.statistic_dict[key] = np.array(self.statistic_dict[key]).tolist()
         json.dump(self.statistic_dict, open(os.path.join(self.data_path, 'statistics.json'), 'w'))

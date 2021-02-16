@@ -27,7 +27,6 @@ class MGPickAndPlaceEnv(multigoal_fetch_env.MultiGoalFetch, utils.EzPickle):
     def __init__(self,
                  reward_type='sparse',
                  binary_final_goal=True,
-                 distance_threshold=0.02,
                  rotational_control_z=False):
         self.demonstrator = StepDemonstrator([
             [0],
@@ -61,7 +60,7 @@ class MGPickAndPlaceEnv(multigoal_fetch_env.MultiGoalFetch, utils.EzPickle):
             goal_has_gripper_pos=True,
             block_gripper=False, n_substeps=20,
             gripper_extra_height=0.2, target_offset=0.0,
-            obj_range=0.15, target_range=0.15, distance_threshold=distance_threshold,
+            obj_range=0.15, target_range=0.15, distance_threshold=0.02,
             initial_qpos=initial_qpos, reward_type=reward_type, binary_final_goal=binary_final_goal,
             rotational_control_z=rotational_control_z)
         utils.EzPickle.__init__(self)
