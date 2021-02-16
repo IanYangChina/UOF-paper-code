@@ -112,7 +112,7 @@ class UniversalOptionFramework(object):
         self.act_batch_size = params.LOW_LEVEL_BATCH_SIZE
         self.act_gamma = params.LOW_LEVEL_GAMMA
         self.act_tau = params.LOW_LEVEL_TAU
-        self.act_clip_value = params.LOW_LEVEL_CLIP_VALUE
+        self.act_clip_value = -self.training_time_steps
         self.act_optim_steps = params.LOW_LEVEL_OPTIMIZATION_STEP
         self.act_hindsight = params.LOW_LEVEL_HINDSIGHT_REPLAY
         # Get actors
@@ -701,10 +701,7 @@ class UniversalOptionFramework(object):
         np.save(os.path.join(self.data_path, 'act_input_means'), self.normalizer.input_mean_low)
         np.save(os.path.join(self.data_path, 'act_input_vars'), self.normalizer.input_var_low)
         for key in self.statistic_dict.keys():
-            try:
-                self.statistic_dict[key] = np.array(self.statistic_dict[key]).tolist()
-            except:
-                pass
+            self.statistic_dict[key] = np.array(self.statistic_dict[key]).tolist()
         json.dump(self.statistic_dict, open(os.path.join(self.data_path, 'statistics.json'), 'w'))
 
     def _plot_statistics(self, keys=None, x_labels=None, y_labels=None, window=5):
@@ -731,10 +728,10 @@ class UniversalOptionFramework(object):
                     label = 'Optimization step'
                 elif 'cycle' in key:
                     label = 'Cycle'
-                elif 'epoch' in key:
-                    label = 'Epoch'
-                else:
+                elif 'episode' in key:
                     label = 'Episode'
+                else:
+                    label = 'Epoch'
                 x_labels.update({key: label})
 
         if keys is None:
