@@ -42,13 +42,13 @@ class Params:
 
     # training params
     ENV_ID = 'TwoObjectOneOrderBinaryHighLvGoal-v0'
-    TRAINING_EPOCH = 51
+    TRAINING_EPOCH = 11
     TRAINING_CYCLE = 50
     TRAINING_EPISODE = 16
     TESTING_EPISODE = 30
     TESTING_GAP = 1
     TESTING_TIMESTEP = 50
-    SAVING_GAP = 25
+    SAVING_GAP = 5
     SEED = 0
     PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'result')
     CKPT_PATH = os.path.join(PATH, "ckpts")

@@ -300,9 +300,9 @@ class UniversalOptionFramework(object):
         self.statistic_dict['low_level_test_avg_success_rate'].append(
             self.statistic_dict['low_level_test_avg_goal_specific_success_rate'][-1].mean())
 
-    def test_optor(self, render, testing_episode_per_goal=None, load_network_epoch=None):
+    def test_optor(self, render, testing_episode_per_goal=None, load_network_epoch=None, intervention=False):
         if load_network_epoch is not None:
-            self._load_ckpts(epoch=load_network_epoch, intra=True)
+            self._load_ckpts(epoch=load_network_epoch, intra=True, inter=True)
         if testing_episode_per_goal is None:
             testing_episode_per_goal = self.testing_episode_per_goal
         avg_return = np.zeros(self.option_num)
@@ -330,6 +330,8 @@ class UniversalOptionFramework(object):
                         op_obs = dcp(obs_)
                         avg_return[goal_ind] += int(opt_reward + 1)
                         ep_return += int(opt_reward + 1)
+                        if intervention:
+                            sub_goal_done = True
                 if ep_return > 0:
                     # refer the episode as a success if the demanded goal was achieved for even just one timestep
                     avg_success[goal_ind] += 1
@@ -660,7 +662,7 @@ class UniversalOptionFramework(object):
         if actor_dict is not None:
             T.save(actor_dict['actor_target'].state_dict(), self.ckpt_path + '/ckpt_actor_target_epoch' + ckpt_mark)
 
-    def _load_ckpts(self, epoch, intra=True, inter=True):
+    def _load_ckpts(self, epoch, intra=False, inter=False):
         self.normalizer.set_statistics(
             mean=np.load(os.path.join(self.data_path, "act_input_means.npy")),
             var=np.load(os.path.join(self.data_path, "act_input_vars.npy"))
@@ -698,6 +700,11 @@ class UniversalOptionFramework(object):
     def _save_statistics(self):
         np.save(os.path.join(self.data_path, 'act_input_means'), self.normalizer.input_mean_low)
         np.save(os.path.join(self.data_path, 'act_input_vars'), self.normalizer.input_var_low)
+        for key in self.statistic_dict.keys():
+            try:
+                self.statistic_dict[key] = np.array(self.statistic_dict[key]).tolist()
+            except:
+                pass
         json.dump(self.statistic_dict, open(os.path.join(self.data_path, 'statistics.json'), 'w'))
 
     def _plot_statistics(self, keys=None, x_labels=None, y_labels=None, window=5):

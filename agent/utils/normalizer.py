@@ -72,11 +72,6 @@ class GoalEnvNormalizer(object):
         self.different_goals = different_goals
         self.set_statistics(input_mean_low, input_var_low)
 
-        self.input_mean_low = np.concatenate((self.obs_history_mean, self.goal_history_mean_low), axis=0)
-        self.input_var_low = np.concatenate((self.obs_history_var, self.goal_history_var_low), axis=0)
-        self.input_mean_high = np.concatenate((self.obs_history_mean, self.goal_history_mean_high), axis=0)
-        self.input_var_high = np.concatenate((self.obs_history_var, self.goal_history_var_high), axis=0)
-
         self.sample_count = 0
         self.epsilon_low = epsilon * np.ones(self.obs_dims+self.goal_dims_low)
         self.input_clip_range_low = (-clip_range*np.ones(self.obs_dims+self.goal_dims_low),
@@ -105,6 +100,11 @@ class GoalEnvNormalizer(object):
         else:
             self.goal_history_mean_high = self.goal_history_mean_low.copy()
             self.goal_history_var_high = self.goal_history_var_low.copy()
+
+        self.input_mean_low = np.concatenate((self.obs_history_mean, self.goal_history_mean_low), axis=0)
+        self.input_var_low = np.concatenate((self.obs_history_var, self.goal_history_var_low), axis=0)
+        self.input_mean_high = np.concatenate((self.obs_history_mean, self.goal_history_mean_high), axis=0)
+        self.input_var_high = np.concatenate((self.obs_history_var, self.goal_history_var_high), axis=0)
 
     def store_history(self, obs, goal_low, goal_high):
         self.obs_history.append(obs)
