@@ -646,10 +646,10 @@ class UniversalOptionFramework(object):
         else:
             ckpt_mark = str(epoch) + 'No' + str(ind) + '.pt'
         if optor_dict is not None:
-            T.save(optor_dict['optor_target'].state_dict(), self.ckpt_path + '/ckpt_optor_target_epoch' + ckpt_mark)
+            T.save(optor_dict['optor_target'].state_dict(), os.path.join(self.ckpt_path, 'ckpt_optor_target_epoch' + ckpt_mark))
 
         if actor_dict is not None:
-            T.save(actor_dict['actor_target'].state_dict(), self.ckpt_path + '/ckpt_actor_target_epoch' + ckpt_mark)
+            T.save(actor_dict['actor_target'].state_dict(), os.path.join(self.ckpt_path, 'ckpt_actor_target_epoch' + ckpt_mark))
 
     def _load_ckpts(self, epoch, intra=False, inter=False):
         if self.load_pre_trained_policy:
@@ -681,11 +681,11 @@ class UniversalOptionFramework(object):
             ckpt_mark = str(epoch) + 'No' + str(ind) + '.pt'
         if optor_dict is not None:
             optor_dict['optor_target'].load_state_dict(
-                T.load(os.path.join(path, '/ckpt_optor_target_epoch'+ckpt_mark), map_location=self.device))
+                T.load(os.path.join(path, 'ckpt_optor_target_epoch'+ckpt_mark), map_location=self.device))
 
         if actor_dict is not None:
             actor_dict['actor_target'].load_state_dict(
-                T.load(os.path.join(path, '/ckpt_actor_target_epoch'+ckpt_mark), map_location=self.device))
+                T.load(os.path.join(path, 'ckpt_actor_target_epoch'+ckpt_mark), map_location=self.device))
 
     def _save_statistics(self):
         np.savetxt(os.path.join(self.data_path, 'act_input_means.dat'), self.normalizer.input_mean_low)
