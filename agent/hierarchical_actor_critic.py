@@ -14,10 +14,8 @@ from agent.utils.exploration_strategy import ConstantChance
 from agent.utils.plot import smoothed_plot, smoothed_plot_multi_line
 from collections import namedtuple
 
-OPT_Tr = namedtuple("transition",
-                    ('state', 'desired_goal', 'option', 'next_state', 'achieved_goal', 'option_done', 'reward', 'done'))
-ACT_Tr = namedtuple("transition",
-                    ('state', 'desired_goal', 'action', 'next_state', 'achieved_goal', 'reward', 'done'))
+Tr = namedtuple("transition",
+                ('state', 'desired_goal', 'action', 'next_state', 'achieved_goal', 'reward', 'done'))
 
 
 class HierarchicalActorCritic(object):
@@ -354,7 +352,7 @@ class HierarchicalActorCritic(object):
         inputs = self.normalizer(inputs)
         inputs = T.tensor(inputs, dtype=T.float).to(self.device)
         with T.no_grad():
-            option = self.optor['optor_target'](inputs).cpu().detach().numpy()
+            option = self.optor['optor'](inputs).cpu().detach().numpy()
         if test:
             option = np.clip(option, -self.option_max, self.option_max)
         else:
@@ -489,7 +487,7 @@ class HierarchicalActorCritic(object):
 
     def _get_optor(self, opt_mem_capacity, seed, option_lr):
         optor_dict = dict()
-        optor_dict['optor_memory'] = HACReplayBuffer(opt_mem_capacity, OPT_Tr, seed=seed)
+        optor_dict['optor_memory'] = HACReplayBuffer(opt_mem_capacity, Tr, seed=seed)
 
         optor_dict['optor'] = Actor(self.obs_dim + self.sub_goal_dim, self.sub_goal_dim).to(self.device)
         optor_dict['critic'] = Critic(self.obs_dim + self.sub_goal_dim + self.sub_goal_dim).to(self.device)
@@ -500,7 +498,7 @@ class HierarchicalActorCritic(object):
 
     def _get_actor(self, act_mem_capacity, seed, action_lr):
         actor_dict = dict()
-        actor_dict['actor_memory'] = LowLevelHindsightReplayBuffer(act_mem_capacity, ACT_Tr, seed=seed)
+        actor_dict['actor_memory'] = LowLevelHindsightReplayBuffer(act_mem_capacity, Tr, seed=seed)
 
         actor_dict['actor'] = Actor(self.obs_dim + self.sub_goal_dim, self.action_dim).to(self.device)
         actor_dict['actor_target'] = Actor(self.obs_dim + self.sub_goal_dim, self.action_dim).to(self.device)
