@@ -8,9 +8,9 @@ from copy import deepcopy as dcp
 from gym.error import UnregisteredEnv
 from torch.optim.adam import Adam
 from agent.utils.normalizer import GoalEnvNormalizer
-from agent.utils.networks import Actor, Critic, Mlp
-from agent.utils.replay_buffer import HighLevelHindsightReplayBuffer, LowLevelHindsightReplayBuffer
-from agent.utils.exploration_strategy import ExpDecayGreedy, ConstantChance, AutoAdjustingConstantChance
+from agent.utils.networks import Actor, Critic
+from agent.utils.replay_buffer import LowLevelHindsightReplayBuffer, HACReplayBuffer
+from agent.utils.exploration_strategy import ConstantChance
 from agent.utils.plot import smoothed_plot, smoothed_plot_multi_line
 from collections import namedtuple
 
@@ -22,8 +22,6 @@ ACT_Tr = namedtuple("transition",
 
 class HierarchicalActorCritic(object):
     def __init__(self, params):
-        from config.config_hac import Params
-        params = Params
         T.manual_seed(params.SEED)
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
 
@@ -78,12 +76,12 @@ class HierarchicalActorCritic(object):
         self.num_sub_goal_set = self.env.option_space.n
         self.normalizer = GoalEnvNormalizer(self.obs_dim, self.sub_goal_dim, self.final_goal_dim,
                                             different_goals=self.env.env.binary_final_goal)
+        self.train = params.TRAIN
 
         """High-Level policies - DDPG"""
         # opt, optor refer to high-level policy
         # In HAC, an option is a sub-goal vector
         # Learning params
-        self.opt_train = params.HIGH_LEVEL_TRAIN
         self.opt_batch_size = params.HIGH_LEVEL_BATCH_SIZE
         self.opt_gamma = params.HIGH_LEVEL_GAMMA
         self.opt_tau = params.HIGH_LEVEL_TAU
@@ -99,7 +97,6 @@ class HierarchicalActorCritic(object):
         """Low-Level policies - DDPG"""
         # act, actor refer to low-level policy
         # Learning params
-        self.act_train = params.LOW_LEVEL_TRAIN
         self.act_batch_size = params.LOW_LEVEL_BATCH_SIZE
         self.act_gamma = params.LOW_LEVEL_GAMMA
         self.act_tau = params.LOW_LEVEL_TAU
@@ -118,8 +115,8 @@ class HierarchicalActorCritic(object):
         # Hindsight
         self.hindsight = params.HINDSIGHT_REPLAY
         # Exploration. In HAC, the both levels use the same exploration strategy
-        self.exploration = ConstantChance(chance=params.LOW_LEVEL_EXPLORATION_ALPHA)
-        self.noise_deviation = params.LOW_LEVEL_EXPLORATION_SIGMA
+        self.exploration = ConstantChance(chance=params.EXPLORATION_ALPHA)
+        self.noise_deviation = params.EXPLORATION_SIGMA
 
     def run(self, render=False):
         for epo in range(self.training_epoch):
@@ -186,11 +183,12 @@ class HierarchicalActorCritic(object):
                         if render:
                             self.env.render()
                         step_count += 1
-                        action = self._select_action(obs['observation'], obs['sub_goal'], test=(not self.act_train))
+                        action = self._select_action(obs['observation'], obs['sub_goal'], test=False)
                         obs_, act_reward, time_done, _ = self.env.step(action)
                         low_level_return += int(act_reward + 1)
-                        opt_reward, sub_goal_done, _, _ = self.env.option_step(obs_, option, act_reward, option_is_goal=True)
-                        if self.act_train:
+                        opt_reward, sub_goal_done, _, _ = self.env.option_step(obs_, option, act_reward,
+                                                                               option_is_goal=True)
+                        if self.train:
                             self.actor['actor_memory'].store_experience(new_option,
                                                                         obs['observation'], obs['sub_goal'], action,
                                                                         obs_['observation'], obs_['achieved_sub_goal'],
@@ -207,25 +205,23 @@ class HierarchicalActorCritic(object):
                     if sub_goal_test and (not sub_goal_done):
                         opt_reward = int(-self.H)
 
-                    if self.opt_train:
-                        self.self.optor['optor_memory'].store_experience(new_episode,
-                                                                         op_obs['observation'],
-                                                                         op_obs['desired_goal'],
-                                                                         op_obs['sub_goal'],  # sub-goal is option
-                                                                         obs['observation'],
-                                                                         obs['achieved_goal'],
-                                                                         opt_reward,
-                                                                         1 - int(time_done))
+                    if self.train:
+                        self.optor['optor_memory'].store_experience(new_episode,
+                                                                    op_obs['observation'],
+                                                                    op_obs['desired_goal'],
+                                                                    op_obs['sub_goal'],  # sub-goal is option
+                                                                    obs['observation'],
+                                                                    obs['achieved_goal'],
+                                                                    opt_reward,
+                                                                    1 - int(time_done))
                     op_obs = dcp(obs)
                     new_episode = False
 
                 self.training_episode_count += 1
-                low_level_goal_specific_avg_return.append(low_level_goal_specific_return)
-                high_level_goal_specific_avg_return.append(high_level_goal_specific_return)
 
             self._update()
-            print('Epoch: %i, cycle: %i, avg returns:\n' % (epo, cyc),
-                  'Low-level: {}\nHigh-level: {}'.format(low_level_return / self.training_episode,
+            print('Epoch: %i, cycle: %i, avg returns:' % (epo, cyc),
+                  'Low-level: {}, High-level: {}'.format(low_level_return / self.training_episode,
                                                          high_level_return / self.training_episode))
             low_level_return_cyc.append(low_level_return / self.training_episode)
             high_level_return_cyc.append(high_level_return / self.training_episode)
@@ -241,9 +237,9 @@ class HierarchicalActorCritic(object):
         sub_goal_count = 0
         low_level_avg_return = 0
         low_level_avg_success = 0
-        high_level_avg_return = np.zeros(self.option_num)
-        high_level_avg_success = np.zeros(self.option_num)
-        for goal_ind in range(self.option_num):
+        high_level_avg_return = np.zeros(self.num_sub_goal_set)
+        high_level_avg_success = np.zeros(self.num_sub_goal_set)
+        for goal_ind in range(self.num_sub_goal_set):
             for ep in range(testing_episode_per_goal):
                 high_level_return = 0
                 obs = self.env.reset()
@@ -371,13 +367,11 @@ class HierarchicalActorCritic(object):
         return option
 
     def _update(self):
-        if self.act_train:
-            self.normalizer.update()
-            self._act_learn(self.actor)
-
-        if self.opt_train:
-            self.normalizer.update()
-            self._opt_learn(self.optor)
+        if not self.train:
+            return
+        self.normalizer.update()
+        self._act_learn(self.actor)
+        self._opt_learn(self.optor)
 
     def _act_learn(self, actor_dict):
         if len(self.actor['actor_memory'].episodes) == 0:
@@ -430,26 +424,26 @@ class HierarchicalActorCritic(object):
             self._act_soft_update(actor_dict)
 
     def _opt_learn(self, optor_dict):
-        if len(self.self.optor['optor_memory'].episodes) == 0:
+        if len(self.optor['optor_memory'].episodes) == 0:
             return
 
         if self.hindsight:
-            self.self.optor['optor_memory'].modify_experiences()
-        self.self.optor['optor_memory'].store_episode()
+            self.optor['optor_memory'].modify_experiences()
+        self.optor['optor_memory'].store_episode()
 
         batch_size = self.opt_batch_size
-        if len(self.self.optor['optor_memory']) < batch_size:
+        if len(self.optor['optor_memory']) < batch_size:
             return
 
         steps = self.opt_optim_steps
         for i in range(steps):
-            batch = self.self.optor['optor_memory'].sample(batch_size)
+            batch = self.optor['optor_memory'].sample(batch_size)
             optor_inputs = np.concatenate((batch.state, batch.desired_goal), axis=1)
             optor_inputs = self.normalizer(optor_inputs, level='low')
             optor_inputs = T.tensor(optor_inputs, dtype=T.float32).to(self.device)
             options = T.tensor(batch.action, dtype=T.float32).to(self.device)
             # scale the stored options from [-0.25, 1.60] to be within [-1, 1]
-            options = (options+0.25)*2/1.85 - 1
+            options = (options + 0.25) * 2 / 1.85 - 1
             optor_inputs_ = np.concatenate((batch.next_state, batch.desired_goal), axis=1)
             optor_inputs_ = self.normalizer(optor_inputs_, level='low')
             optor_inputs_ = T.tensor(optor_inputs_, dtype=T.float32).to(self.device)
@@ -563,11 +557,11 @@ class HierarchicalActorCritic(object):
             ckpt_mark = str(epoch) + 'No' + str(ind) + '.pt'
         if optor_dict is not None:
             optor_dict['optor'].load_state_dict(
-                T.load(os.path.join(path, '/ckpt_optor_epoch'+ckpt_mark), map_location=self.device))
+                T.load(os.path.join(path, '/ckpt_optor_epoch' + ckpt_mark), map_location=self.device))
 
         if actor_dict is not None:
             actor_dict['actor_target'].load_state_dict(
-                T.load(os.path.join(path, '/ckpt_actor_target_epoch'+ckpt_mark), map_location=self.device))
+                T.load(os.path.join(path, '/ckpt_actor_target_epoch' + ckpt_mark), map_location=self.device))
 
     def _save_statistics(self):
         np.savetxt(os.path.join(self.data_path, 'act_input_means.dat'), self.normalizer.input_mean_low)

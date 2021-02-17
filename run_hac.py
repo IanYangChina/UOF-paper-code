@@ -1,16 +1,12 @@
 import os
 import argparse
-from config.config_uof import Params
+from config.config_hac import Params
 from config.shared import *
-from agent.universal_option_framework import UniversalOptionFramework as UOF
+from agent.hierarchical_actor_critic import HierarchicalActorCritic as HAC
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--task-id', dest='task_id', type=int,
-                    help='Index of the target task id, default: 0', default=0, choices=[i for i in range(8)])
-parser.add_argument('--multi-inter', dest='multi_inter',
-                    help='Whether to use multiple high-level policies, default: False', default=False, action='store_true')
-parser.add_argument('--no-aaes', dest='no_aaes',
-                    help='Whether to NOT use the AAES method, default: False', default=False, action='store_true')
+                    help='Index of the target task id, default: 0', default=0, choices=[0, 1])
 parser.add_argument('--no-demo', dest='no_abstract_demonstration',
                     help='Whether to NOT use abstract demonstrations, default: False', default=False, action='store_true')
 parser.add_argument('--demo-proportion', dest='demonstration_proportion', type=float,
@@ -33,23 +29,20 @@ if __name__ == '__main__':
     Params.CKPT_PATH = os.path.join(Params.PATH, "ckpts")
     Params.DATA_PATH = os.path.join(Params.PATH, "data")
     # training flags
-    Params.LOW_LEVEL_TRAIN = args['train']
-    Params.HIGH_LEVEL_TRAIN = args['train']
+    Params.TRAIN = args['train']
     Params.LOAD_PER_TRAIN_POLICY = not args['train']
     # paths to load pre-trained policies
-    Params.PRE_TRAIN_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'pretrained_policy', 'task_'+str(Params.ENV_ID))
+    Params.PRE_TRAIN_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'pretrained_policy', 'hac_task_'+str(Params.ENV_ID))
     Params.PRE_TRAIN_CKPT_PATH = os.path.join(Params.PRE_TRAIN_PATH, "ckpts")
     Params.PRE_TRAIN_DATA_PATH = os.path.join(Params.PRE_TRAIN_PATH, "data")
     # algorithm setup
-    Params.MULTI_INTER_POLICY = args['multi_inter']
-    Params.LOW_LEVEL_EXPLORATION_AAES = not args['no_aaes']
     Params.ABSTRACT_DEMONSTRATION = not args['no_abstract_demonstration']
     Params.ABSTRACT_DEMONSTRATION_PROPORTION = args['demonstration_proportion']
     # build agent
-    agent = UOF(params=Params)
+    agent = HAC(params=Params)
     if args['train']:
         print("Start training from scratch...")
         agent.run(render=args['render'])
     else:
-        print("Evaluate a low-level policy that was pre-trained for %i epochs" % Params.TRAINING_EPOCH-1)
-        agent.test_actor(render=args['render'], load_network_epoch=Params.TRAINING_EPOCH-1)
+        print("Evaluate the agent pre-trained for %i epochs" % Params.TRAINING_EPOCH-1)
+        agent.test(render=args['render'], load_network_epoch=Params.TRAINING_EPOCH-1)
