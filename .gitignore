@@ -5,3 +5,4 @@
 /multigoal_env/__pycache__/
 /multigoal_env/ball_envs/__pycache__/
 /multigoal_env/fetch_envs/__pycache__/
+/config/__pycache__/

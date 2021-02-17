@@ -12,5 +12,10 @@ env_ids = [
     'ThreeObjectOneStageTwoOrderRandomSize-v0',
 ]
 
+hac_env_ids = [
+    'TwoObjectOneOrderHAC-v0',
+    'ThreeObjectOneStageTwoOrderHAC-v0'
+]
+
 training_epochs = [301, 801, 1001, 1501, 2000, 300, 301, 801]
 testing_timesteps = [50, 50, 50, 60, 80, 50, 50, 50]
