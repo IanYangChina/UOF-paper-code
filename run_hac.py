@@ -7,14 +7,14 @@ from agent.hierarchical_actor_critic import HierarchicalActorCritic as HAC
 parser = argparse.ArgumentParser()
 parser.add_argument('--task-id', dest='task_id', type=int,
                     help='Index of the target task id, default: 0', default=0, choices=[0, 1])
+parser.add_argument('--render', dest='render',
+                    help='Whether to render the task, default: False', default=False, action='store_true')
+parser.add_argument('--train', dest='train',
+                    help='Whether to train policies from scratch, default: False', default=False, action='store_true')
 parser.add_argument('--no-demo', dest='no_abstract_demonstration',
                     help='Whether to NOT use abstract demonstrations, default: False', default=False, action='store_true')
 parser.add_argument('--demo-proportion', dest='demonstration_proportion', type=float,
                     help='The proportion of episodes that are demonstrated, default: 0.75', default=0.75, choices=[0.0, 0.25, 0.5, 0.75, 1.0])
-parser.add_argument('--train', dest='train',
-                    help='Whether to train policies from scratch, default: False', default=False, action='store_true')
-parser.add_argument('--render', dest='render',
-                    help='Whether to render the task, default: False', default=False, action='store_true')
 
 if __name__ == '__main__':
     args = vars(parser.parse_args())

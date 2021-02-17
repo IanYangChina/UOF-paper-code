@@ -15,49 +15,6 @@ def calculate_mean_var(sample_count, new_sample_num, new_history, old_mean, old_
     return new_mean, new_var
 
 
-class Normalizer(object):
-    def __init__(self, input_dims, init_mean, init_var, scale_factor=1, epsilon=1e-2, clip_range=3):
-        self.input_dims = input_dims
-        self.sample_count = 0
-        self.obs_history = []
-        if init_mean is None:
-            self.obs_history_mean = np.zeros(self.input_dims)
-        else:
-            self.obs_history_mean = init_mean
-        if init_var is None:
-            self.obs_history_var = np.zeros(self.input_dims)
-        else:
-            self.obs_history_var = init_var
-        self.epsilon = epsilon*np.ones(self.input_dims)
-        self.input_clip_range = (-clip_range*np.ones(self.input_dims), clip_range*np.ones(self.input_dims))
-        self.scale_factor = scale_factor
-
-    def store_history(self, *args):
-        self.obs_history.append(*args)
-
-    # update mean and var for z-score normalization
-    def update_mean(self):
-        if len(self.obs_history) == 0:
-            return
-        new_sample_num = len(self.obs_history)
-
-        self.obs_history_mean, self.obs_history_var = calculate_mean_var(
-            self.sample_count, new_sample_num,
-            np.array(self.obs_history, dtype=np.float),
-            self.obs_history_mean.copy(), self.obs_history_var.copy()
-        )
-        self.obs_history.clear()
-
-        self.sample_count += new_sample_num
-        self.obs_history.clear()
-
-    # pre-process inputs, currently using max-min-normalization
-    def __call__(self, inputs):
-        inputs = (inputs - self.obs_history_mean) / (self.obs_history_var+self.epsilon)
-        inputs = np.clip(inputs, self.input_clip_range[0], self.input_clip_range[1])
-        return self.scale_factor*inputs
-
-
 class GoalEnvNormalizer(object):
     def __init__(self, obs_dims, goal_dims_low, goal_dims_high,
                  input_mean_low=None, input_var_low=None, different_goals=True,
