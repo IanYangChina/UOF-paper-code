@@ -29,7 +29,7 @@ something like `/home/someone/UOF-paper-code`.
     - Evaluate the pre-trained HAC agent `python run_hac.py --task-id 0`
     - Train your own UOF agent `python run_uof.py --task-id 0 --train`
     - Train your own HAC agent `python run_hac.py --task-id 0 --train`
-5. If you are using PyCharm or whatever IDE that is, just modify the arguments in the script as you like and run it.
+5. If you know what you are doing, just modify the arguments in the script as you like.
 6. More algorithm-related parameters can be found in the [config files](https://github.com/IanYangChina/UOF-paper-code/tree/main/config).
 
 #### Task id (pre-trained policy) - paper result relation
