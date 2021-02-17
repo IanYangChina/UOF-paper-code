@@ -5,6 +5,7 @@ This is the official implementation of the codes that produced the results in th
 Feel free to play with the codes and raise issues.
 
 <img src="/src/graphical_abstract.jpg" width=1080>
+<img src="/src/paper_abstract.jpg" width=1080>
 
 #### Citation: to be updated.
 
