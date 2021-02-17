@@ -53,12 +53,12 @@ given in the paper figures. The given UOF policies were trained with AAES and 0.
 | | |
 | :---------------------- | :----------------------------------------------- |
 | Arguments               | Description                                      |
-| `--task-id i`           | Task id, where, $i \in {0, 1, 2, ..., 7}$        |
+| `--task-id i`           | Task id, where, ![](https://latex.codecogs.com/svg.latex?i%20\in%20\{0,%201,%20...,%207\})        |
 | `--render`              | Use this flag if you want to render the task     |
 | `--train`               | Use this flag for training an agent from scratch |
 | `--multi-inter`         | Use this flag to train separate high-level policies for each goal |
 | `--no-aaes`             | Use this flag to turn off the AAES exploration strategy |
 | `--no-demo`             | Use this flag to turn off the Abstract Demonstrations |
-| `--demo-proportion j`   | Use this flag to set the proportion of episodes that use demonstrations, where, $j \in {0.0, 0.25, 0.5, 0.75, 1.0}$ |
+| `--demo-proportion j`   | Use this flag to set the proportion of episodes that use demonstrations, where, ![](https://latex.codecogs.com/svg.latex?j%20\in%20\{0.0,%200.25,%200.5,%200.75,%201.0\}) |
 
 For `run_hac.py`, ignore the `--multi-inter` and `--no-aaes` arguments.
