@@ -37,7 +37,7 @@ class UniversalOptionFramework(object):
         self.pre_trained_data_path = params.PRE_TRAIN_DATA_PATH
 
         try:
-            self.env = mg.make(params.ENV_ID)
+            self.env = mg.make(params.ENV_NAME)
         except UnregisteredEnv:
             raise UnregisteredEnv("Make sure the env id: {} is correct\nExisting id: {}".format(params.ENV_ID, mg.ids))
         self.env.seed(params.SEED)
