@@ -14,6 +14,7 @@ from agent.utils.exploration_strategy import ConstantChance
 from agent.utils.plot import smoothed_plot, smoothed_plot_multi_line
 from collections import namedtuple
 
+np.set_printoptions(precision=3)
 Tr = namedtuple("transition",
                 ('state', 'desired_goal', 'action', 'next_state', 'achieved_goal', 'reward', 'done'))
 
@@ -37,7 +38,7 @@ class HierarchicalActorCritic(object):
         try:
             self.env = mg.make(params.ENV_NAME)
         except UnregisteredEnv:
-            raise UnregisteredEnv("Make sure the env id: {} is correct\nExisting id: {}".format(params.ENV_ID, mg.ids))
+            raise UnregisteredEnv("Make sure the env name: {} is correct\nExisting env: {}".format(params.ENV_NAME, mg.ids))
         self.env.seed(params.SEED)
 
         self.training_time_steps = dcp(self.env._max_episode_steps)
@@ -524,10 +525,10 @@ class HierarchicalActorCritic(object):
         else:
             ckpt_mark = str(epoch) + 'No' + str(ind) + '.pt'
         if optor_dict is not None:
-            T.save(optor_dict['optor'].state_dict(), self.ckpt_path + '/ckpt_optor_epoch' + ckpt_mark)
+            T.save(optor_dict['optor'].state_dict(), os.path.join(self.ckpt_path, 'ckpt_optor_epoch' + ckpt_mark))
 
         if actor_dict is not None:
-            T.save(actor_dict['actor_target'].state_dict(), self.ckpt_path + '/ckpt_actor_target_epoch' + ckpt_mark)
+            T.save(actor_dict['actor_target'].state_dict(), os.path.join(self.ckpt_path, 'ckpt_actor_target_epoch' + ckpt_mark))
 
     def _load_ckpts(self, epoch, intra=False, inter=False):
         if self.load_pre_trained_policy:
@@ -555,11 +556,11 @@ class HierarchicalActorCritic(object):
             ckpt_mark = str(epoch) + 'No' + str(ind) + '.pt'
         if optor_dict is not None:
             optor_dict['optor'].load_state_dict(
-                T.load(os.path.join(path, '/ckpt_optor_epoch' + ckpt_mark), map_location=self.device))
+                T.load(os.path.join(path, 'ckpt_optor_epoch' + ckpt_mark), map_location=self.device))
 
         if actor_dict is not None:
             actor_dict['actor_target'].load_state_dict(
-                T.load(os.path.join(path, '/ckpt_actor_target_epoch' + ckpt_mark), map_location=self.device))
+                T.load(os.path.join(path, 'ckpt_actor_target_epoch' + ckpt_mark), map_location=self.device))
 
     def _save_statistics(self):
         np.savetxt(os.path.join(self.data_path, 'act_input_means.dat'), self.normalizer.input_mean_low)

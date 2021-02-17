@@ -103,7 +103,7 @@ register(
 
 ids.append('Pyramid-v0')
 register(
-    id='ThreeObjectBinPackingTwoStage-v0',
+    id='Pyramid-v0',
     entry_point='multigoal_env.fetch_envs.three_obj_bin_packing_two_stage:MGPickAndPlaceEnv',
     kwargs={'reward_type': 'sparse',
             'binary_final_goal': True},

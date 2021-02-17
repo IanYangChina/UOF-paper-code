@@ -14,6 +14,7 @@ from agent.utils.exploration_strategy import ExpDecayGreedy, ConstantChance, Aut
 from agent.utils.plot import smoothed_plot, smoothed_plot_multi_line
 from collections import namedtuple
 
+np.set_printoptions(precision=3)
 OPT_Tr = namedtuple("transition",
                     ('state', 'desired_goal', 'option', 'next_state', 'achieved_goal', 'option_done', 'reward', 'done'))
 ACT_Tr = namedtuple("transition",
@@ -39,7 +40,7 @@ class UniversalOptionFramework(object):
         try:
             self.env = mg.make(params.ENV_NAME)
         except UnregisteredEnv:
-            raise UnregisteredEnv("Make sure the env id: {} is correct\nExisting id: {}".format(params.ENV_ID, mg.ids))
+            raise UnregisteredEnv("Make sure the env name: {} is correct\nExisting env: {}".format(params.ENV_NAME, mg.ids))
         self.env.seed(params.SEED)
 
         self.training_time_steps = dcp(self.env._max_episode_steps)
@@ -149,7 +150,6 @@ class UniversalOptionFramework(object):
 
             if epo % self.testing_gap == 0:
                 if self.act_train:
-                    self.env._max_episode_steps = self.testing_time_steps
                     self.test_actor(render=render)
                     print("Epoch: %i Low-level test success rates: " % epo,
                           self.statistic_dict['low_level_test_avg_goal_specific_success_rate'][-1])
@@ -253,6 +253,7 @@ class UniversalOptionFramework(object):
             np.mean(self.statistic_dict['high_level_train_avg_goal_specific_return_per_epoch'][-1]))
 
     def test_actor(self, render, testing_episode_per_goal=None, load_network_epoch=None):
+        self.env._max_episode_steps = self.testing_time_steps
         if load_network_epoch is not None:
             self._load_ckpts(epoch=load_network_epoch, intra=True)
         if testing_episode_per_goal is None:
@@ -301,6 +302,7 @@ class UniversalOptionFramework(object):
             self.statistic_dict['low_level_test_avg_goal_specific_success_rate'][-1].mean())
 
     def test_optor(self, render, testing_episode_per_goal=None, load_network_epoch=None, intervention=False):
+        self.env._max_episode_steps = self.testing_time_steps
         if load_network_epoch is not None:
             self._load_ckpts(epoch=load_network_epoch, intra=True, inter=True)
         if testing_episode_per_goal is None:

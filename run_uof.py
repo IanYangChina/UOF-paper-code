@@ -53,3 +53,5 @@ if __name__ == '__main__':
     else:
         print("Evaluate a low-level policy that was pre-trained for %i epochs" % (Params.TRAINING_EPOCH-1))
         agent.test_actor(render=args['render'], load_network_epoch=Params.TRAINING_EPOCH-1)
+        print("Evaluate a high-level policy that was pre-trained for %i epochs" % (Params.TRAINING_EPOCH-1))
+        agent.test_optor(render=args['render'], load_network_epoch=Params.TRAINING_EPOCH-1)

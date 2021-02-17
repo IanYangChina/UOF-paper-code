@@ -17,5 +17,5 @@ hac_env_ids = [
     'ThreeObjectOneStageTwoOrderHAC-v0'
 ]
 
-training_epochs = [301, 801, 1001, 1501, 2000, 300, 301, 801]
+training_epochs = [301, 801, 1001, 1501, 2001, 301, 301, 801]
 testing_timesteps = [50, 50, 50, 60, 80, 50, 50, 50]
