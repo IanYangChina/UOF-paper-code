@@ -29,7 +29,7 @@ if __name__ == '__main__':
     Params.TRAINING_EPOCH = training_epochs[args['task_id']]
     Params.TESTING_TIMESTEP = testing_timesteps[args['task_id']]
     # paths for training from scratch
-    Params.PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'result', 'task_'+str(Params.ENV_ID))
+    Params.PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'result', 'task_'+str(Params.ENV_ID))
     Params.CKPT_PATH = os.path.join(Params.PATH, "ckpts")
     Params.DATA_PATH = os.path.join(Params.PATH, "data")
     # training flags
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     Params.HIGH_LEVEL_TRAIN = args['train']
     Params.LOAD_PER_TRAIN_POLICY = not args['train']
     # paths to load pre-trained policies
-    Params.PRE_TRAIN_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'pretrained_policy', 'task_'+str(Params.ENV_ID))
+    Params.PRE_TRAIN_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pretrained_policy', 'task_'+str(Params.ENV_ID))
     Params.PRE_TRAIN_CKPT_PATH = os.path.join(Params.PRE_TRAIN_PATH, "ckpts")
     Params.PRE_TRAIN_DATA_PATH = os.path.join(Params.PRE_TRAIN_PATH, "data")
     # algorithm setup
@@ -51,5 +51,5 @@ if __name__ == '__main__':
         print("Start training from scratch...")
         agent.run(render=args['render'])
     else:
-        print("Evaluate a low-level policy that was pre-trained for %i epochs" % Params.TRAINING_EPOCH-1)
+        print("Evaluate a low-level policy that was pre-trained for %i epochs" % (Params.TRAINING_EPOCH-1))
         agent.test_actor(render=args['render'], load_network_epoch=Params.TRAINING_EPOCH-1)
