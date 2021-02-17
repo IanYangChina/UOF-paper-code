@@ -147,7 +147,7 @@ class GoalEnvNormalizer(object):
         self.sample_count += new_sample_num
 
     # pre-process inputs, currently using mean-variance-normalization
-    def __call__(self, inputs, level):
+    def __call__(self, inputs, level='low'):
         if level == 'low':
             inputs = (inputs - self.input_mean_low) / (self.input_var_low + self.epsilon_low)
             inputs = np.clip(inputs, self.input_clip_range_low[0], self.input_clip_range_low[1])

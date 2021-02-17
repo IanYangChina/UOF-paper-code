@@ -30,8 +30,11 @@ if __name__ == '__main__':
     Params.PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'result', 'task_'+str(Params.ENV_ID))
     Params.CKPT_PATH = os.path.join(Params.PATH, "ckpts")
     Params.DATA_PATH = os.path.join(Params.PATH, "data")
-    # paths to load pre-trained policies
+    # training flags
+    Params.LOW_LEVEL_TRAIN = args['train']
+    Params.HIGH_LEVEL_TRAIN = args['train']
     Params.LOAD_PER_TRAIN_POLICY = not args['train']
+    # paths to load pre-trained policies
     Params.PRE_TRAIN_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'pretrained_policy', 'task_'+str(Params.ENV_ID))
     Params.PRE_TRAIN_CKPT_PATH = os.path.join(Params.PRE_TRAIN_PATH, "ckpts")
     Params.PRE_TRAIN_DATA_PATH = os.path.join(Params.PRE_TRAIN_PATH, "data")
@@ -43,7 +46,7 @@ if __name__ == '__main__':
     # build agent
     agent = UOF(params=Params)
     if args['train']:
-        print("Starting training from scratch...")
+        print("Start training from scratch...")
         agent.run()
     else:
         print("Evaluate a low-level policy that was pre-trained for %i epochs" % Params.TRAINING_EPOCH-1)
