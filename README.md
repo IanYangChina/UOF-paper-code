@@ -1,7 +1,7 @@
 ### Official implementation for the UOF paper (algorithm &amp; environment)
 
 This is the official implementation of the codes that produced the results in the 2021 IEEE TNNLS paper titled 
-**"Hierarchical Reinforcement Learning with Universal Policies for Multi-Step Robotic Manipulation"**. [Link to video demo](https://vdn3.vzuu.com/SD/578e00c2-71fd-11eb-b488-ba4512ea9685.mp4?disable_local_cache=1&bu=http-com&expiration=1613768283&auth_key=1613768283-0-0-3836577d9430f6224b7dd6f53caeab2c&f=mp4&v=tx)
+**"Hierarchical Reinforcement Learning with Universal Policies for Multi-Step Robotic Manipulation"**. [Link to video demo](https://www.zhihu.com/zvideo/1345876079437942784).
 Feel free to play with the codes and raise issues.
 
 <img src="/src/paper_abstract.jpg" width=1080>
