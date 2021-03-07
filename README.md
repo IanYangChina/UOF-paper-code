@@ -2,7 +2,7 @@
 
 This is the official implementation of the codes that produced the results in the 2021 IEEE TNNLS paper titled 
 [**"Hierarchical Reinforcement Learning with Universal Policies for Multi-Step Robotic Manipulation"**](https://doi.org/10.1109/TNNLS.2021.3059912). 
-[Link to video demo](https://www.zhihu.com/zvideo/1345876079437942784).
+[Link to video demo](https://www.youtube.com/watch?v=n_wQuf4r0qk).
 Feel free to play with the codes and raise issues.
 
 <img src="/src/graphical_abstract.jpg" width=1080>
