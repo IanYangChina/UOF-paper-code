@@ -1,13 +1,25 @@
 ### Official implementation for the UOF paper (algorithm &amp; environment)
 
 This is the official implementation of the codes that produced the results in the 2021 IEEE TNNLS paper titled 
-**"Hierarchical Reinforcement Learning with Universal Policies for Multi-Step Robotic Manipulation"**.
+[**"Hierarchical Reinforcement Learning with Universal Policies for Multi-Step Robotic Manipulation"**](https://doi.org/10.1109/TNNLS.2021.3059912). 
+[Link to video demo](https://www.youtube.com/watch?v=n_wQuf4r0qk).
 Feel free to play with the codes and raise issues.
 
 <img src="/src/graphical_abstract.jpg" width=1080>
-<img src="/src/paper_abstract.jpg" width=1080>
 
-#### Citation: to be updated.
+#### If you use our codes, please consider cite our paper as follow:
+
+```
+@ARTICLE{9366328,
+  author={X. {Yang} and Z. {Ji} and J. {Wu} and Y. -K. {Lai} and C. {Wei} and G. {Liu} and R. {Setchi}},
+  journal={IEEE Transactions on Neural Networks and Learning Systems}, 
+  title={Hierarchical Reinforcement Learning With Universal Policies for Multistep Robotic Manipulation}, 
+  year={2021},
+  volume={},
+  number={},
+  pages={1-15},
+  doi={10.1109/TNNLS.2021.3059912}}
+```
 
 #### Main Dependencies:
 1. Ubuntu 16.04
@@ -29,7 +41,7 @@ something like `/home/someone/UOF-paper-code`.
     - Evaluate the pre-trained HAC agent `python run_hac.py --task-id 0`
     - Train your own UOF agent `python run_uof.py --task-id 0 --train`
     - Train your own HAC agent `python run_hac.py --task-id 0 --train`
-5. If you are using PyCharm or whatever IDE that is, just modify the arguments in the script as you like and run it.
+5. If you know what you are doing, just modify the arguments in the script as you like.
 6. More algorithm-related parameters can be found in the [config files](https://github.com/IanYangChina/UOF-paper-code/tree/main/config).
 
 #### Task id (pre-trained policy) - paper result relation
