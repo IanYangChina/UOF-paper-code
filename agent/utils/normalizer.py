@@ -5,7 +5,7 @@ def calculate_mean_var(sample_count, new_sample_num, new_history, old_mean, old_
     new_mean = np.mean(new_history, axis=0)
 
     new_var = np.sum(np.square(new_history - new_mean), axis=0)
-    new_var = (sample_count * old_var + new_var)
+    new_var = (sample_count * np.square(old_var) + new_var)
     new_var /= (new_sample_num + sample_count)
     new_var = np.sqrt(new_var)
 
