@@ -2,7 +2,7 @@ import os
 import copy
 import numpy as np
 
-import gym
+import gym_robotics
 from gym import error, spaces
 from gym.utils import seeding
 
@@ -16,7 +16,7 @@ except ImportError as e:
 DEFAULT_SIZE = 500
 
 
-class MultiGoalFetchBaseEnv(gym.GoalEnv):
+class MultiGoalFetchBaseEnv(gym_robotics.core.GoalEnv):
     def __init__(self, model_path, initial_qpos, n_actions, n_substeps):
         if model_path.startswith('/'):
             fullpath = model_path

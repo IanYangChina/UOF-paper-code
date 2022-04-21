@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
-from gym.envs.robotics import utils
+from gym_robotics.envs import utils
 from multigoal_env import multigoal_fetch_base_env
 
 

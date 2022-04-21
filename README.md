@@ -22,14 +22,13 @@ Feel free to play with the codes and raise issues.
 ```
 
 #### Main Dependencies:
-1. Ubuntu 16.04
+1. Ubuntu 16.04/18.04 were tested
     - Higher version Ubuntu systems should work as well.
     - The project was developed and tested on Linux, not sure how it works on Windows.
 2. Python 3
-3. [Mujoco150](https://www.roboti.us/index.html)
-4. [Mujoco-py==1.50.1.68](https://github.com/openai/mujoco-py/tree/master) `python -m pip install mujoco-py==1.50.1.68`
-5. [Pytorch](https://pytorch.org/get-started/locally/)
-6. Others `python -m pip install -r requirements.txt`
+3. Mujoco and mujoco-py (150, 200, & 210) should be all working properly
+4. [Pytorch](https://pytorch.org/get-started/locally/)
+5. Others `python -m pip install -r requirements.txt`
 
 #### Get started:
 1. Clone the repository to wherever you like.
