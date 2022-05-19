@@ -429,7 +429,7 @@ class UniversalOptionFramework(object):
             option = T.argmax(option_values).item()
         else:
             if self.env.np_random.uniform(0, 1) < self.optor_exploration(ep):
-                option = self.env.np_random.randint(0, self.option_num - 1)
+                option = self.env.np_random.randint(0, self.option_num)
             else:
                 option = T.argmax(option_values).item()
         return option
