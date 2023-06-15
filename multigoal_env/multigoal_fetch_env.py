@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
-from gym_robotics.envs import utils
+from gym.envs.robotics.utils import ctrl_set_action, mocap_set_action, robot_get_obs, reset_mocap_welds
 from multigoal_env import multigoal_fetch_base_env
 
 
@@ -122,9 +122,9 @@ class MultiGoalFetch(multigoal_fetch_base_env.MultiGoalFetchBaseEnv):
 
         # Apply action to simulation.
         # gripper finger control (symmetric)
-        utils.ctrl_set_action(self.sim, action)
+        ctrl_set_action(self.sim, action)
         # gripper xyz position control
-        utils.mocap_set_action(self.sim, action)
+        mocap_set_action(self.sim, action)
 
     def _get_obs(self):
         # gripper position
@@ -132,7 +132,7 @@ class MultiGoalFetch(multigoal_fetch_base_env.MultiGoalFetchBaseEnv):
         dt = self.sim.nsubsteps * self.sim.model.opt.timestep
         # gripper linear velocities
         grip_velp = self.sim.data.get_site_xvelp('robot0:grip') * dt
-        robot_qpos, robot_qvel = utils.robot_get_obs(self.sim)
+        robot_qpos, robot_qvel = robot_get_obs(self.sim)
         # gripper finger states & linear velocities
         finger_state = robot_qpos[-2:]
         finger_vel = robot_qvel[-2:] * dt  # change to a scalar if the gripper is made symmetric
@@ -353,7 +353,7 @@ class MultiGoalFetch(multigoal_fetch_base_env.MultiGoalFetchBaseEnv):
     def _env_setup(self, initial_qpos):
         for name, value in initial_qpos.items():
             self.sim.data.set_joint_qpos(name, value)
-        utils.reset_mocap_welds(self.sim)
+        reset_mocap_welds(self.sim)
         self.sim.forward()
 
         # Move end effector into position.

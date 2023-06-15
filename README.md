@@ -26,9 +26,10 @@ Feel free to play with the codes and raise issues.
     - Higher version Ubuntu systems should work as well.
     - The project was developed and tested on Linux, not sure how it works on Windows.
 2. Python 3
-3. Mujoco and mujoco-py (150, 200, & 210) should be all working properly
-4. [Pytorch](https://pytorch.org/get-started/locally/)
-5. Others `python -m pip install -r requirements.txt`
+3. **Make sure you `pip install gym==0.21.0`**. The multigoal gym codes have been removed from later releases.
+4. Mujoco and mujoco-py (150, 200, & 210) should be all working properly
+5. [Pytorch](https://pytorch.org/get-started/locally/)
+6. Others `python -m pip install -r requirements.txt`
 
 #### Get started:
 1. Clone the repository to wherever you like.
